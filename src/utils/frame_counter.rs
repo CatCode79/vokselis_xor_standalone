@@ -1,21 +1,21 @@
 use std::time::Instant;
 
-pub struct FrameCounter {
-    pub frame_count: u32,
+pub(crate) struct FrameCounter {
+    pub(crate) frame_count: u32,
     accum_time: f32,
     last_inst: Instant,
 }
 
 impl FrameCounter {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Self::default()
     }
 
-    pub fn time_delta(&self) -> f32 {
+    pub(crate) fn time_delta(&self) -> f32 {
         self.accum_time * 1000.0 / self.frame_count as f32
     }
 
-    pub fn record(&mut self) -> f32 /* dt */ {
+    pub(crate) fn record(&mut self) -> f32 /* dt */ {
         self.accum_time += self.last_inst.elapsed().as_secs_f32();
         self.last_inst = Instant::now();
 

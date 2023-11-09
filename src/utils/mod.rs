@@ -8,12 +8,12 @@ use std::{
     ops::{Deref, DerefMut},
 };
 
-pub fn dispatch_optimal(len: u32, subgroup_size: u32) -> u32 {
+pub(crate) fn dispatch_optimal(len: u32, subgroup_size: u32) -> u32 {
     let padded_size = (subgroup_size - len % subgroup_size) % subgroup_size;
     (len + padded_size) / subgroup_size
 }
 
-pub trait NonZeroSized: Sized {
+pub(crate) trait NonZeroSized: Sized {
     const SIZE: NonZeroU64 = unsafe { NonZeroU64::new_unchecked(std::mem::size_of::<Self>() as _) };
 }
 /// Holds invariants? Nah!

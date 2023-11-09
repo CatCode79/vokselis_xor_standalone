@@ -1,54 +1,49 @@
 mod global_ubo;
 mod hdr_backbuffer;
-#[allow(dead_code)]
-mod pipelines;
-mod present_pipeline;
-mod volume_texture;
 
-pub use global_ubo::GlobalUniformBinding;
-pub use global_ubo::Uniform;
-pub use hdr_backbuffer::HdrBackBuffer;
-pub use volume_texture::VolumeTexture;
+pub(crate) use global_ubo::GlobalUniformBinding;
+pub(crate) use global_ubo::Uniform;
+pub(crate) use hdr_backbuffer::HdrBackBuffer;
 
+use crate::pipelines::present_pipeline::PresentPipeline;
 use crate::utils::frame_counter::FrameCounter;
 use crate::utils::input::Input;
 use crate::{Camera, CameraBinding};
 
-use present_pipeline::PresentPipeline;
 use wgpu::StoreOp;
 use winit::{dpi::PhysicalSize, window::Window};
 
 use std::{sync::Arc, time::Instant};
 
-pub struct Context {
+pub(crate) struct Context {
+    #[allow(dead_code)]
     adapter: wgpu::Adapter,
-    pub device: Arc<wgpu::Device>,
-    pub queue: wgpu::Queue,
+    pub(crate) device: Arc<wgpu::Device>,
+    pub(crate) queue: wgpu::Queue,
     surface: wgpu::Surface,
-    pub surface_config: wgpu::SurfaceConfiguration,
-    pub limits: wgpu::Limits,
+    pub(crate) surface_config: wgpu::SurfaceConfiguration,
 
-    pub camera: Camera,
-    pub camera_binding: CameraBinding,
+    pub(crate) camera: Camera,
+    pub(crate) camera_binding: CameraBinding,
 
-    pub render_backbuffer: HdrBackBuffer,
+    pub(crate) render_backbuffer: HdrBackBuffer,
 
     rgb_texture: wgpu::Texture,
 
-    pub width: u32,
-    pub height: u32,
+    pub(crate) width: u32,
+    pub(crate) height: u32,
 
     timeline: Instant,
 
-    pub global_uniform: Uniform,
-    pub global_uniform_binding: GlobalUniformBinding,
+    pub(crate) global_uniform: Uniform,
+    pub(crate) global_uniform_binding: GlobalUniformBinding,
 
     present_pipeline: PresentPipeline,
 }
 
 impl Context {
     /// Create a new window with a given `window`
-    pub async fn new(window: &Window, camera: Option<Camera>) -> Result<Self, String> {
+    pub(crate) async fn new(window: &Window, camera: Camera) -> Result<Self, String> {
         // Create new instance using first-tier backend of WGPU
         // One of Vulkan + Metal + DX12 + Browser WebGPU
         let instance_desc = wgpu::InstanceDescriptor {
@@ -102,15 +97,6 @@ impl Context {
         };
         surface.configure(&device, &surface_config);
 
-        let camera = camera.unwrap_or_else(|| {
-            Camera::new(
-                1.,
-                0.5,
-                1.,
-                (0., 0., 0.).into(),
-                width as f32 / height as f32,
-            )
-        });
         let render_backbuffer = HdrBackBuffer::new(&device, HdrBackBuffer::DEFAULT_RESOLUTION);
         let rgb_texture = create_rgb_framebuffer(&device, &surface_config);
 
@@ -140,56 +126,10 @@ impl Context {
             queue,
             surface,
             surface_config,
-            limits,
         })
     }
 
-    pub fn get_info(&self) -> RendererInfo {
-        let info = self.adapter.get_info();
-        RendererInfo {
-            device_name: info.name,
-            device_type: self.get_device_type().to_string(),
-            vendor_name: self.get_vendor_name().to_string(),
-            backend: self.get_backend().to_string(),
-            screen_format: self.surface_config.format,
-        }
-    }
-
-    fn get_vendor_name(&self) -> &str {
-        match self.adapter.get_info().vendor {
-            0x1002 => "AMD",
-            0x1010 => "ImgTec",
-            0x10DE => "NVIDIA Corporation",
-            0x13B5 => "ARM",
-            0x5143 => "Qualcomm",
-            0x8086 => "INTEL Corporation",
-            _ => "Unknown vendor",
-        }
-    }
-
-    fn get_backend(&self) -> &str {
-        match self.adapter.get_info().backend {
-            wgpu::Backend::Empty => "Empty",
-            wgpu::Backend::Vulkan => "Vulkan",
-            wgpu::Backend::Metal => "Metal",
-            wgpu::Backend::Dx12 => "Dx12",
-            wgpu::Backend::Dx11 => "Dx11",
-            wgpu::Backend::Gl => "GL",
-            wgpu::Backend::BrowserWebGpu => "Browser WGPU",
-        }
-    }
-
-    fn get_device_type(&self) -> &str {
-        match self.adapter.get_info().device_type {
-            wgpu::DeviceType::Other => "Other",
-            wgpu::DeviceType::IntegratedGpu => "Integrated GPU",
-            wgpu::DeviceType::DiscreteGpu => "Discrete GPU",
-            wgpu::DeviceType::VirtualGpu => "Virtual GPU",
-            wgpu::DeviceType::Cpu => "CPU",
-        }
-    }
-
-    pub fn update(&mut self, frame_counter: &FrameCounter, input: &Input) {
+    pub(crate) fn update(&mut self, frame_counter: &FrameCounter, input: &Input) {
         self.global_uniform.time = self.timeline.elapsed().as_secs_f32();
         self.global_uniform.time_delta = frame_counter.time_delta();
         self.global_uniform.frame = frame_counter.frame_count;
@@ -202,7 +142,7 @@ impl Context {
         self.camera_binding.update(&self.queue, &mut self.camera);
     }
 
-    pub fn resize(&mut self, width: u32, height: u32) {
+    pub(crate) fn resize(&mut self, width: u32, height: u32) {
         self.width = width;
         self.height = height;
         self.surface_config.height = height;
@@ -214,7 +154,7 @@ impl Context {
         self.camera.set_aspect(width, height);
     }
 
-    pub fn render(&self) -> Result<(), wgpu::SurfaceError> {
+    pub(crate) fn render(&self) -> Result<(), wgpu::SurfaceError> {
         let frame = self.surface.get_current_texture()?;
         let frame_view = frame.texture.create_view(&Default::default());
 
@@ -264,12 +204,12 @@ impl Context {
 }
 
 #[derive(Debug)]
-pub struct RendererInfo {
-    pub device_name: String,
-    pub device_type: String,
-    pub vendor_name: String,
-    pub backend: String,
-    pub screen_format: wgpu::TextureFormat,
+pub(crate) struct RendererInfo {
+    pub(crate) device_name: String,
+    pub(crate) device_type: String,
+    pub(crate) vendor_name: String,
+    pub(crate) backend: String,
+    pub(crate) screen_format: wgpu::TextureFormat,
 }
 
 impl std::fmt::Display for RendererInfo {

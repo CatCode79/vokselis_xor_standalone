@@ -1,4 +1,4 @@
-use crate::pipeline::xor_compute;
+use crate::pipelines::xor_compute;
 use crate::{CameraBinding, HdrBackBuffer, Uniform};
 
 pub(crate) struct RaycastPipeline {
@@ -13,9 +13,7 @@ impl RaycastPipeline {
     ) -> Self {
         let module = device.create_shader_module(module_desc);
         let pipeline = Self::make_pipeline(device, module, entry_point);
-        Self {
-            pipeline,
-        }
+        Self { pipeline }
     }
 
     fn make_pipeline(

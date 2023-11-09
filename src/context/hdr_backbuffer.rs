@@ -1,15 +1,14 @@
-pub struct HdrBackBuffer {
-    pub texture_view: wgpu::TextureView,
-    pub render_bind_group: wgpu::BindGroup,
-    pub storage_bind_group: wgpu::BindGroup,
+pub(crate) struct HdrBackBuffer {
+    pub(crate) render_bind_group: wgpu::BindGroup,
+    pub(crate) storage_bind_group: wgpu::BindGroup,
 }
 
 impl HdrBackBuffer {
-    pub const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba16Float;
-    pub const DEFAULT_RESOLUTION: (u32, u32) = (1280, 720);
-    pub const DESC_COMPUTE: wgpu::BindGroupLayoutDescriptor<'static> =
+    pub(crate) const FORMAT: wgpu::TextureFormat = wgpu::TextureFormat::Rgba16Float;
+    pub(crate) const DEFAULT_RESOLUTION: (u32, u32) = (1280, 720);
+    pub(crate) const DESC_COMPUTE: wgpu::BindGroupLayoutDescriptor<'static> =
         wgpu::BindGroupLayoutDescriptor {
-            label: Some("Storage Texture Layour"),
+            label: Some("Storage Texture Layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStages::COMPUTE,
@@ -21,7 +20,7 @@ impl HdrBackBuffer {
                 count: None,
             }],
         };
-    pub const DESC_RENDER: wgpu::BindGroupLayoutDescriptor<'static> =
+    pub(crate) const DESC_RENDER: wgpu::BindGroupLayoutDescriptor<'static> =
         wgpu::BindGroupLayoutDescriptor {
             label: Some("BackBuffer: Render Bind Group Layout"),
             entries: &[wgpu::BindGroupLayoutEntry {
@@ -36,7 +35,7 @@ impl HdrBackBuffer {
             }],
         };
 
-    pub fn new(device: &wgpu::Device, (width, height): (u32, u32)) -> Self {
+    pub(crate) fn new(device: &wgpu::Device, (width, height): (u32, u32)) -> Self {
         let texture_view = {
             let size = wgpu::Extent3d {
                 width,
@@ -81,13 +80,8 @@ impl HdrBackBuffer {
         };
 
         Self {
-            texture_view,
             render_bind_group,
             storage_bind_group,
         }
-    }
-
-    pub fn format(&self) -> wgpu::TextureFormat {
-        Self::FORMAT
     }
 }

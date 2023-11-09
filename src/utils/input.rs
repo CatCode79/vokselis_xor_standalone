@@ -8,25 +8,25 @@ use winit::{
 };
 
 #[derive(Debug, Default)]
-pub struct Input {
-    pub up_pressed: bool,
-    pub down_pressed: bool,
-    pub right_pressed: bool,
-    pub left_pressed: bool,
-    pub slash_pressed: bool,
-    pub right_shift_pressed: bool,
-    pub enter_pressed: bool,
-    pub space_pressed: bool,
-    pub left_mouse_pressed: bool,
-    pub mouse_position: [f32; 2],
+pub(crate) struct Input {
+    pub(crate) up_pressed: bool,
+    pub(crate) down_pressed: bool,
+    pub(crate) right_pressed: bool,
+    pub(crate) left_pressed: bool,
+    pub(crate) slash_pressed: bool,
+    pub(crate) right_shift_pressed: bool,
+    pub(crate) enter_pressed: bool,
+    pub(crate) space_pressed: bool,
+    pub(crate) left_mouse_pressed: bool,
+    pub(crate) mouse_position: [f32; 2],
 }
 
 impl Input {
-    pub fn new() -> Self {
+    pub(crate) fn new() -> Self {
         Default::default()
     }
 
-    pub fn update(&mut self, event: &WindowEvent, window: &Window) -> bool {
+    pub(crate) fn update(&mut self, event: &WindowEvent, window: &Window) -> bool {
         match event {
             WindowEvent::KeyboardInput {
                 event:
@@ -81,12 +81,12 @@ impl Input {
                 ..
             } => self.left_mouse_pressed = matches!(state, ElementState::Pressed),
 
-            _ => { }
+            _ => {}
         }
         true
     }
 
-    pub fn process_position(&self, uniform: &mut Uniform) {
+    pub(crate) fn process_position(&self, uniform: &mut Uniform) {
         let dx = 0.01;
         if self.left_pressed {
             uniform.pos[0] -= dx;
