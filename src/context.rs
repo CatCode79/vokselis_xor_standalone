@@ -5,7 +5,7 @@ pub(crate) use global_ubo::GlobalUniformBinding;
 pub(crate) use global_ubo::Uniform;
 pub(crate) use hdr_backbuffer::HdrBackBuffer;
 
-use crate::pipelines::present_pipeline::PresentPipeline;
+use crate::pipelines::present::PresentPipeline;
 use crate::utils::frame_counter::FrameCounter;
 use crate::utils::input::Input;
 use crate::{Camera, CameraBinding};
@@ -199,26 +199,6 @@ impl Context {
 
         frame.present();
 
-        Ok(())
-    }
-}
-
-#[derive(Debug)]
-pub(crate) struct RendererInfo {
-    pub(crate) device_name: String,
-    pub(crate) device_type: String,
-    pub(crate) vendor_name: String,
-    pub(crate) backend: String,
-    pub(crate) screen_format: wgpu::TextureFormat,
-}
-
-impl std::fmt::Display for RendererInfo {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        writeln!(f, "Vendor name: {}", self.vendor_name)?;
-        writeln!(f, "Device name: {}", self.device_name)?;
-        writeln!(f, "Device type: {}", self.device_type)?;
-        writeln!(f, "Backend: {}", self.backend)?;
-        write!(f, "Screen format: {:?}", self.screen_format)?;
         Ok(())
     }
 }

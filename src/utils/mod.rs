@@ -21,23 +21,23 @@ impl<T> NonZeroSized for T where T: Sized {}
 
 /// A hash map with a [HashSet](std::collections::HashSet) to hold unique values
 #[derive(Debug)]
-pub(crate) struct ContiniousHashMap<K, V>(HashMap<K, Vec<V>>);
+pub(crate) struct ContinuousHashMap<K, V>(HashMap<K, Vec<V>>);
 
-impl<K, V> Deref for ContiniousHashMap<K, V> {
+impl<K, V> Deref for ContinuousHashMap<K, V> {
     type Target = HashMap<K, Vec<V>>;
     fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
 
-impl<K, V> DerefMut for ContiniousHashMap<K, V> {
+impl<K, V> DerefMut for ContinuousHashMap<K, V> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.0
     }
 }
 
-impl<K, V> ContiniousHashMap<K, V> {
-    /// Creates an empty [ContiniousHashMap]
+impl<K, V> ContinuousHashMap<K, V> {
+    /// Creates an empty [ContinuousHashMap]
     ///
     /// The hash map is initially created with a capacity of 0,
     /// so it will not allocate until it is first inserted into.
@@ -47,7 +47,7 @@ impl<K, V> ContiniousHashMap<K, V> {
     }
 }
 
-impl<K: Eq + Hash, V> ContiniousHashMap<K, V> {
+impl<K: Eq + Hash, V> ContinuousHashMap<K, V> {
     /// Inserts a key-value pair into the map.
     ///
     /// If the mep already contain this key this method will add
@@ -58,7 +58,7 @@ impl<K: Eq + Hash, V> ContiniousHashMap<K, V> {
     }
 }
 
-impl<K, V> Default for ContiniousHashMap<K, V> {
+impl<K, V> Default for ContinuousHashMap<K, V> {
     fn default() -> Self {
         Self(HashMap::new())
     }
