@@ -20,9 +20,8 @@ pub(crate) struct Context {
     adapter: wgpu::Adapter,
     pub(crate) device: Arc<wgpu::Device>,
     pub(crate) queue: wgpu::Queue,
-    surface: wgpu::Surface,
+    surface: wgpu::Surface<'static>,
     pub(crate) surface_config: wgpu::SurfaceConfiguration,
-
     pub(crate) camera: Camera,
     pub(crate) camera_binding: CameraBinding,
 
@@ -43,7 +42,7 @@ pub(crate) struct Context {
 
 impl Context {
     /// Create a new window with a given `window`
-    pub(crate) async fn new(window: &Window, camera: Camera) -> Result<Self, String> {
+    pub(crate) async fn new(window: Arc<Window>, camera: Camera) -> Result<Self, String> {
         // Create new instance using first-tier backend of WGPU
         // One of Vulkan + Metal + DX12 + Browser WebGPU
         let instance_desc = wgpu::InstanceDescriptor {
@@ -54,7 +53,7 @@ impl Context {
 
         // Create a `surface` represents a platform-specific window
         // onto which rendered images may be presented
-        let surface = unsafe { instance.create_surface(&window) }.unwrap();
+        let surface = instance.create_surface(window.clone()).unwrap();
 
         // Get a handle to a physical device
         let adapter: wgpu::Adapter = instance
@@ -76,8 +75,8 @@ impl Context {
             .request_device(
                 &wgpu::DeviceDescriptor {
                     label: Some("Device Descriptor"),
-                    features,
-                    limits: limits.clone(),
+                    required_features: features,
+                    required_limits: limits.clone(),
                 },
                 None,
             )
@@ -92,6 +91,7 @@ impl Context {
             width,
             height,
             present_mode: wgpu::PresentMode::Fifo,
+            desired_maximum_frame_latency: 2,
             alpha_mode: wgpu::CompositeAlphaMode::Auto,
             view_formats: vec![],
         };
